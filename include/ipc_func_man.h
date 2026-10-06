@@ -51,6 +51,7 @@ public:
 	static IPCReturn* Announce(vector<void*>* argv, vector<uint8_t>* argt);
 	static IPCReturn* BcastAnnounce(vector<void*>* argv, vector<uint8_t>* argt);
 	static IPCReturn* KickPlayer(vector<void*>* argv, vector<uint8_t>* argt);
+	static IPCReturn* Exec(std::vector<void*>* argv, std::vector<uint8_t>* argt);
 	
 	static IPCReturn* LimboDeny(vector<void*>* argv, vector<uint8_t>* argt);
 	static IPCReturn* LimboAccept(vector<void*>* argv, vector<uint8_t>* argt);
