@@ -49,51 +49,54 @@ PCL void OnInfoRequest(pluginInfo_t *info)
 	strncpy(info->shortDescription, "Wonderland for CoD4X17a", sizeof(info->shortDescription));
 }
 
-PCL void OnPlayerJoinReq(int clientnum, netadr_t* netaddress, char* pbguid, char* userinfo, int authstatus, char* deniedmsg, int deniedmsgbufmaxlen, qboolean* wait)
+PCL void OnPlayerJoinReq(int clientnum, netadr_t* netaddress, char* pbguid,
+                         char* userinfo, int authstatus, char* deniedmsg,
+                         int deniedmsgbufmaxlen, qboolean* wait)
 {
 #ifdef WONDERLANDX_STANDALONE
-    // Standalone mode: accept all joins immediately
     *wait = qfalse;
     LimboMan::Instance()->Reset(clientnum);
     return;
 #endif
 
-	bool isWaiting = LimboMan::Instance()->IsWaiting(clientnum);
-	bool isDenied  = LimboMan::Instance()->IsDenied(clientnum);
-	
-	// Allow the main thread to continue with dealing with the connection request
-	if(!isWaiting)
-		*wait = qfalse;
-	else
-		*wait = qtrue;
-	
+    bool isWaiting = LimboMan::Instance()->IsWaiting(clientnum);
+    bool isDenied  = LimboMan::Instance()->IsDenied(clientnum);
+
+    // 1) If denied, send message and let engine drop the client
 	if(isDenied)
 	{
-		size_t deniedLen = strnlen(deniedmsg, MAX_STRING_CHARS);
-		
-		strncpy(deniedmsg, LimboMan::Instance()->GetDenyReason(clientnum), deniedLen);
-		deniedmsgbufmaxlen = deniedLen;
-	}
-	
-	// If the slot has not been accepted yet then send the event
-	if(isWaiting)
-	{
-		const char* ipAddr = Plugin_NET_AdrToStringShort(netaddress);
+		char* reason = LimboMan::Instance()->GetDenyReason(clientnum);
+		size_t deniedLen = strnlen(reason, MAX_STRING_CHARS);
 
-		IPCEvent* event = new IPCEvent("JOINREQ");
-		event->AddArgument((void*) clientnum, IPCTypes::uint);
-		event->AddArgument((void*) ipAddr, IPCTypes::ch);
-		event->AddArgument((void*) Plugin_GetPlayerGUID(clientnum), IPCTypes::ch);
-		event->AddArgument((void*) userinfo, IPCTypes::ch);
+		strncpy(deniedmsg, reason, deniedLen);
+		deniedmsg[deniedLen] = '\0';  // ensure null-termination
 
-		rabbithole->SetEventForBroadcast(event);
-
-		rabbithole->SignalEventSend();
-	}
-	// If the slot was cleared to continue with dealing with the connection
-	// then just reset this limbo.
-	else
+		*wait = qfalse;               // let engine process the deny
 		LimboMan::Instance()->Reset(clientnum);
+		return;
+	}
+
+    // 2) If not waiting anymore, bot accepted → release
+    if(!isWaiting)
+    {
+        *wait = qfalse;
+        LimboMan::Instance()->Reset(clientnum);
+        return;
+    }
+
+    // 3) Still waiting → hold in limbo and emit JOINREQ
+    *wait = qtrue;
+
+    const char* ipAddr = Plugin_NET_AdrToStringShort(netaddress);
+
+    IPCEvent* event = new IPCEvent("JOINREQ");
+    event->AddArgument((void*) clientnum, IPCTypes::uint);
+    event->AddArgument((void*) ipAddr, IPCTypes::ch);
+    event->AddArgument((void*) Plugin_GetPlayerGUID(clientnum), IPCTypes::ch);
+    event->AddArgument((void*) userinfo, IPCTypes::ch);
+
+    rabbithole->SetEventForBroadcast(event);
+    rabbithole->SignalEventSend();
 }
 
 PCL void OnPlayerConnect(int clientnum, netadr_t* netaddress, char* pbguid, char* userinfo, int authstatus, char* deniedmsg, int deniedmsgbufmaxlen)
