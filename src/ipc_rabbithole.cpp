@@ -21,13 +21,8 @@ IPCRabbithole::IPCRabbithole(int serverPort)
 	for(uint i = 0; i < s; i++)
 		this->queueEvents[i] = NULL;
 	
-	this->serverPort = serverPort;
-	this->ipcBasePath = "/tmp/rabbithole.ipc\0";
-	
-	// Build the path to the IPC socket
-	int strLen = strlen(this->ipcBasePath) + 6 + 1;
-	this->ipcFullPath = (char*) malloc(strLen);
-	snprintf(this->ipcFullPath, strLen, "%s.%d",this->ipcBasePath, this->serverPort);
+	// TCP endpoint
+	this->ipcProtocol = strdup("tcp://0.0.0.0:5555");
 	
 	// Create the allocator thread
 	pthread_create(&this->rabbitholeThread, NULL, &IPCRabbithole::ThreadedRabbitholeInit, this);
@@ -42,34 +37,36 @@ IPCRabbithole::~IPCRabbithole() {}
 
 void* IPCRabbithole::ThreadedRabbitholeInit(void* rabbitholePtr)
 {
-	IPCRabbithole* rabbithole = (IPCRabbithole*)rabbitholePtr;
-	
-	Logger::Debug("Rabbit hole started, attempting to bind IPC @ %s", rabbithole->ipcFullPath);
-	
-	rabbithole->zmqContext = zmq_ctx_new();
-	rabbithole->zmqSocket  = zmq_socket(rabbithole->zmqContext, ZMQ_DEALER);
-	
-	// Build the bind protocol
-	int strLen = strlen(rabbithole->ipcFullPath) + 6 + 1;
-	rabbithole->ipcProtocol = (char*) malloc(strLen);
-	snprintf(rabbithole->ipcProtocol, strLen, "ipc://%s", rabbithole->ipcFullPath);
-	
+    IPCRabbithole* rabbithole = (IPCRabbithole*)rabbitholePtr;
+
+    Logger::Debug("Rabbit hole started, attempting to bind TCP @ %s", rabbithole->ipcProtocol);
+
+    rabbithole->zmqContext = zmq_ctx_new();
+    rabbithole->zmqSocket  = zmq_socket(rabbithole->zmqContext, ZMQ_DEALER);
+
+	// Bind WonderlandX to TCP instead of IPC
+	rabbithole->ipcProtocol = strdup("tcp://0.0.0.0:5555");
+
 	int rc = zmq_bind(rabbithole->zmqSocket, rabbithole->ipcProtocol);
-	
-	if(!rc)
-		Logger::Debug("IPC bind successful");
-	else
-	{
-		Logger::Debug("IPC bind unsuccessful");
-		exit(0);
-	}
-	
-	// Thread out the event sender
-	pthread_create(&rabbithole->eventThread, NULL, &IPCRabbithole::ThreadedEventSender, rabbithole);
-	
-	// Thread out the receiver
-	pthread_create(&rabbithole->rxThread, NULL, &IPCRabbithole::ThreadedRX, rabbithole);
+
+    if (!rc)
+    {
+        Logger::Debug("TCP bind successful");
+    }
+    else
+    {
+        Logger::Debug("TCP bind unsuccessful");
+        // Don’t kill the whole server; just stop this thread
+        return nullptr;
+    }
+
+    pthread_create(&rabbithole->eventThread, NULL, &IPCRabbithole::ThreadedEventSender, rabbithole);
+    pthread_create(&rabbithole->rxThread,    NULL, &IPCRabbithole::ThreadedRX,          rabbithole);
+
+    // Thread entry must return something
+    return nullptr;
 }
+
 
 void* IPCRabbithole::ThreadedEventSender(void* rabbitholePtr)
 {
