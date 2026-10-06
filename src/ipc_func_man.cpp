@@ -124,7 +124,6 @@ IPCReturn* IPCFuncMan::GetAllPlayerData(vector<void*>* argv, vector<uint8_t>* ar
 
 IPCReturn* IPCFuncMan::Tell(std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {
-	// Assert 2 arguments total
 	if(argv->size() != 2)
 		return NULL;
 	
@@ -137,7 +136,6 @@ IPCReturn* IPCFuncMan::Tell(std::vector<void*>* argv, std::vector<uint8_t>* argt
 
 IPCReturn* IPCFuncMan::BcastPrintf(std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {
-	// Assert 1 argument total
 	if(argv->size() != 1)
 		return NULL;
 
@@ -148,7 +146,6 @@ IPCReturn* IPCFuncMan::BcastPrintf(std::vector<void*>* argv, std::vector<uint8_t
 
 IPCReturn* IPCFuncMan::Announce(std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {
-	// Assert 1 argument total
 	if(argv->size() != 2)
 		return NULL;
 
@@ -159,7 +156,6 @@ IPCReturn* IPCFuncMan::Announce(std::vector<void*>* argv, std::vector<uint8_t>* 
 
 IPCReturn* IPCFuncMan::BcastAnnounce(std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {
-	// Assert 1 argument total
 	if(argv->size() != 1)
 		return NULL;
 
@@ -170,7 +166,6 @@ IPCReturn* IPCFuncMan::BcastAnnounce(std::vector<void*>* argv, std::vector<uint8
 
 IPCReturn* IPCFuncMan::KickPlayer(std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {
-	// Assert 1 argument total
 	if(argv->size() != 2)
 		return NULL;
 	
@@ -183,23 +178,21 @@ IPCReturn* IPCFuncMan::KickPlayer(std::vector<void*>* argv, std::vector<uint8_t>
 
 IPCReturn* IPCFuncMan::Exec(std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {
-    // Expect exactly 1 argument: the command string
     if (argv->size() != 1)
         return NULL;
 
     char* cmd = (char*) argv->at(0);
 
     // Execute the command exactly like RCON/server console
-    Plugin_Cbuf_AddText(cmd);   // <--- THIS IS THE MAGIC
-    Plugin_Cbuf_AddText("\n");  // Always terminate with newline
+    Plugin_Cbuf_AddText(cmd);
+    Plugin_Cbuf_AddText("\n");
 
-    return new IPCReturn();     // void return
+    return new IPCReturn();
 }
 
 
 IPCReturn* IPCFuncMan::LimboDeny(std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {
-	// Assert 2 argument total
 	if(argv->size() != 2)
 		return NULL;
 	
@@ -212,7 +205,6 @@ IPCReturn* IPCFuncMan::LimboDeny(std::vector<void*>* argv, std::vector<uint8_t>*
 
 IPCReturn* IPCFuncMan::LimboAccept(std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {	
-	// Assert 1 argument total
 	if(argv->size() != 1)
 		return NULL;
 	
