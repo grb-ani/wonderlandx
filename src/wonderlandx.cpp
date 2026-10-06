@@ -51,6 +51,13 @@ PCL void OnInfoRequest(pluginInfo_t *info)
 
 PCL void OnPlayerJoinReq(int clientnum, netadr_t* netaddress, char* pbguid, char* userinfo, int authstatus, char* deniedmsg, int deniedmsgbufmaxlen, qboolean* wait)
 {
+#ifdef WONDERLANDX_STANDALONE
+    // Standalone mode: accept all joins immediately
+    *wait = qfalse;
+    LimboMan::Instance()->Reset(clientnum);
+    return;
+#endif
+
 	bool isWaiting = LimboMan::Instance()->IsWaiting(clientnum);
 	bool isDenied  = LimboMan::Instance()->IsDenied(clientnum);
 	
@@ -89,7 +96,7 @@ PCL void OnPlayerJoinReq(int clientnum, netadr_t* netaddress, char* pbguid, char
 		LimboMan::Instance()->Reset(clientnum);
 }
 
-PCL void OnPlayerConnect(int clientnum, netadr_t* netaddress, char* pbguid, char* userinfo, int authstatus)
+PCL void OnPlayerConnect(int clientnum, netadr_t* netaddress, char* pbguid, char* userinfo, int authstatus, char* deniedmsg, int deniedmsgbufmaxlen)
 {
 	const char* ipAddr = Plugin_NET_AdrToStringShort(netaddress);
 	

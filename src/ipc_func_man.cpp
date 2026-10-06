@@ -25,6 +25,7 @@ IPCFuncMan::IPCFuncMan()
 	this->RegisterFunction(IPCFuncMan::Announce,         "ANNOUNCE");
 	this->RegisterFunction(IPCFuncMan::BcastAnnounce,    "BCASTANNOUNCE");
 	this->RegisterFunction(IPCFuncMan::KickPlayer,       "KICK");
+	this->RegisterFunction(IPCFuncMan::Exec, "EXEC");
 	
 	this->RegisterFunction(IPCFuncMan::LimboDeny,   "LIMBODENY");
 	this->RegisterFunction(IPCFuncMan::LimboAccept, "LIMBOACCEPT");
@@ -179,6 +180,22 @@ IPCReturn* IPCFuncMan::KickPlayer(std::vector<void*>* argv, std::vector<uint8_t>
 	
 	return new IPCReturn();
 }
+
+IPCReturn* IPCFuncMan::Exec(std::vector<void*>* argv, std::vector<uint8_t>* argt)
+{
+    // Expect exactly 1 argument: the command string
+    if (argv->size() != 1)
+        return NULL;
+
+    char* cmd = (char*) argv->at(0);
+
+    // Execute the command exactly like RCON/server console
+    Plugin_Cbuf_AddText(cmd);   // <--- THIS IS THE MAGIC
+    Plugin_Cbuf_AddText("\n");  // Always terminate with newline
+
+    return new IPCReturn();     // void return
+}
+
 
 IPCReturn* IPCFuncMan::LimboDeny(std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {
