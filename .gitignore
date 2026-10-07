@@ -71,6 +71,6 @@ Testing/
 .devcontainer/
 makefile
 docker-compose.yml
-.env
+*.env
 Taskfile.yml
 tests/bot/

@@ -149,12 +149,13 @@ PCL void OnClientSpawn(gentity_t* ent) {
 	rabbithole->SignalEventSend();
 }
 
-
 PCL void OnMessageSent(char* message, int slot, qboolean *show, int mode)
 {
+#ifdef ALICE_IS_CHATCONTROL
 	// Force the server not to forward the message on to the CoD4 clients
 	// because Alice will deal with them.
 	*show = qfalse;
+#endif
 	
 	IPCEvent* event = new IPCEvent("CHAT");
 	event->AddArgument((void*) slot, IPCTypes::uint);
