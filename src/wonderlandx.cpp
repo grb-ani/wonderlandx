@@ -147,7 +147,6 @@ PCL void OnClientSpawn(gentity_t* ent) {
 
 	rabbithole->SetEventForBroadcast(event);
 	rabbithole->SignalEventSend();
-
 }
 
 
