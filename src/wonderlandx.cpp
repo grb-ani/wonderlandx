@@ -110,7 +110,6 @@ PCL void OnPlayerConnect(int clientnum, netadr_t* netaddress, char* pbguid, char
 	event->AddArgument((void*) userinfo, IPCTypes::ch);
 	
 	rabbithole->SetEventForBroadcast(event);
-	
 	rabbithole->SignalEventSend();
 }
 
@@ -123,16 +122,17 @@ PCL void OnMessageSent(char* message, int slot, qboolean *show, int mode)
 	IPCEvent* event = new IPCEvent("CHAT");
 	event->AddArgument((void*) slot, IPCTypes::uint);
 	event->AddArgument((void*) message, IPCTypes::ch);
+	event->AddArgument((void*) *show, IPCTypes::uint);
+	event->AddArgument((void*) mode, IPCTypes::uint);
+
 	
 	rabbithole->SetEventForBroadcast(event);
-	
 	rabbithole->SignalEventSend();
 }
 
 PCL void OnPlayerDC(client_t* client, const char* reason)
 {
-	// Majik numberrr
-	int clientnum = (int) client / 0x090b4f8c - 1;
+	int clientnum = client - clientbase;
 	
 	IPCEvent* event = new IPCEvent("DC");
 	event->AddArgument((void*) clientnum, IPCTypes::uint);
