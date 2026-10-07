@@ -113,6 +113,44 @@ PCL void OnPlayerConnect(int clientnum, netadr_t* netaddress, char* pbguid, char
 	rabbithole->SignalEventSend();
 }
 
+PCL void OnClientEnterWorld(client_t* client)
+{
+	int clientnum = client - clientbase;
+
+	IPCEvent* event = new IPCEvent("ENTER_WORLD");
+	event->AddArgument((void*) clientnum, IPCTypes::uint);
+	event->AddArgument((void*) client->userinfo, IPCTypes::ch);
+
+	rabbithole->SetEventForBroadcast(event);
+	rabbithole->SignalEventSend();
+}
+
+PCL void OnClientUserinfoChanged(client_t *client)
+{
+	int clientnum = client - clientbase;
+
+	IPCEvent* event = new IPCEvent("USERINFO_CHANGED");
+	event->AddArgument((void*) clientnum, IPCTypes::uint);
+	event->AddArgument((void*) client->userinfo, IPCTypes::ch);
+
+	rabbithole->SetEventForBroadcast(event);
+	rabbithole->SignalEventSend();
+}
+
+PCL void OnClientSpawn(gentity_t* ent) {
+    int clientnum = ent->s.clientNum;
+	int team = Plugin_GetClientTeam(clientnum);
+
+	IPCEvent* event = new IPCEvent("SPAWN");
+	event->AddArgument((void*) clientnum, IPCTypes::uint);
+	event->AddArgument((void*) team, IPCTypes::uint);
+
+	rabbithole->SetEventForBroadcast(event);
+	rabbithole->SignalEventSend();
+
+}
+
+
 PCL void OnMessageSent(char* message, int slot, qboolean *show, int mode)
 {
 	// Force the server not to forward the message on to the CoD4 clients

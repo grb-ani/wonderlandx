@@ -119,6 +119,7 @@
 	
 	__cdecl void Plugin_DropClient( int clientnum, const char *reason );	// Kicks the client from server
 	__cdecl void Plugin_BanClient( unsigned int clientnum, int seconds, int invokerid, char *reason ); //Bans the client for seconds from server. Seconds can be "-1" to create a permanent ban. invokerid can be 0 or the numeric uid. banreason can be NULL or a valid char* pointer.
+    __cdecl int Plugin_GetClientTeam(int clientNum);                                // Get the team of a client
 
     //  -- TCP Connection functions --
     /* 

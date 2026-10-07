@@ -185,7 +185,6 @@ IPCReturn* IPCFuncMan::Exec(std::vector<void*>* argv, std::vector<uint8_t>* argt
 
     // Execute the command exactly like RCON/server console
     Plugin_Cbuf_AddText(cmd);
-    Plugin_Cbuf_AddText("\n");
 
     return new IPCReturn();
 }
